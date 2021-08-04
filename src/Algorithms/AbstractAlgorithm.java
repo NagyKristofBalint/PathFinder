@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 abstract public class AbstractAlgorithm implements Runnable {
     protected Table table;
+    protected ArrayList<ArrayList<Square>> squares;
     protected volatile Thread thread;
     protected volatile boolean isSuspended = false;
     protected volatile boolean pathFound = false;
@@ -20,8 +21,9 @@ abstract public class AbstractAlgorithm implements Runnable {
         return errorMessage;
     }
 
-    public AbstractAlgorithm(Table table) {
+    public AbstractAlgorithm(Table table, ArrayList<ArrayList<Square>> squares) {
         this.table = table;
+        this.squares = squares;
     }
 
     abstract protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException;
@@ -111,6 +113,14 @@ abstract public class AbstractAlgorithm implements Runnable {
         }
 
         return neighbours;
+    }
+
+    protected boolean isStart(Square current) {
+        return current.equals(squares.get(table.getStartX()).get(table.getStartY()));
+    }
+
+    protected boolean isFinish(Square current) {
+        return current.equals(squares.get(table.getFinishX()).get(table.getFinishY()));
     }
 
     public static void setDelay(int delay) {

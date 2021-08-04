@@ -12,6 +12,7 @@ public class Table extends JPanel {
     public static final Color MARKER_COLOR = Color.YELLOW;
     public static final Color REMAINING_COLOR = Color.BLUE;
     public static final Color WALL_COLOR = Color.BLACK;
+    public static final Color PATH_COLOR = Color.ORANGE;
     private int startX = 0;
     private int startY = 0;
     private int finishX;

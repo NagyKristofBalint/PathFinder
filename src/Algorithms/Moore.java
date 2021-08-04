@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Moore extends AbstractAlgorithm {
-    private final ArrayList<ArrayList<Square>> squares;
     private final int size;
     private final int[][] distance;
     private final LinkedList<Square> queue;
+    private Square pathTracerSquare;
 
-    public Moore(Table table) {
-        super(table);
-        squares = table.squares;
+    public Moore(Table table, ArrayList<ArrayList<Square>> squares) {
+        super(table, squares);
         size = squares.size();
         previous = new Square[size][size];
         distance = new int[size][size];
@@ -24,16 +23,17 @@ public class Moore extends AbstractAlgorithm {
             }
         }
         queue = new LinkedList<>();
-        //start
         queue.add(squares.get(table.getStartX()).get(table.getStartY()));
         distance[table.getStartX()][table.getStartY()] = 0;
+
+        pathTracerSquare = squares.get(table.getFinishX()).get(table.getFinishY());
     }
 
     @Override
     protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException {
         //Breath-first search
+        Square current;
         if (!pathFound) {
-            Square current;
             if (!queue.isEmpty()) {
                 //get and pop
                 current = queue.pollFirst();
@@ -64,18 +64,17 @@ public class Moore extends AbstractAlgorithm {
             }
         } else {
             if (!backTraceFinished) {
-
+                if (!isStart(pathTracerSquare)) {
+                    pathTracerSquare = previous[pathTracerSquare.x][pathTracerSquare.y];
+                    pathTracerSquare.setBackground(Table.PATH_COLOR);
+                } else {
+                    pathTracerSquare.setBackground(Table.START_COLOR);
+                    backTraceFinished = true;
+                }
+                Thread.sleep(delay);
             } else {
                 throw new AlgorithmFinishedException("Moore ended");
             }
         }
-    }
-
-    private boolean isStart(Square current) {
-        return current.equals(squares.get(table.getStartX()).get(table.getStartY()));
-    }
-
-    private boolean isFinish(Square current) {
-        return current.equals(squares.get(table.getFinishX()).get(table.getFinishY()));
     }
 }
