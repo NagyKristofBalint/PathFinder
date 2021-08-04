@@ -17,6 +17,7 @@ public class Square extends JPanel {
     private static Table table;
     private static int previousX;
     private static int previousY;
+    private static Color previousColor;
 
     @Override
     public boolean equals(Object obj) {

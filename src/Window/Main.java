@@ -10,14 +10,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class Main extends JFrame {
+public class Main extends JFrame implements AlgorithmListener{
 
     private static final String TITLE = "Path Finder 1.0";
     private static final int WINDOW_WIDTH = 525;
     private static final int WINDOW_HEIGHT = 780;
     private static final int WINDOW_OFFSET_X = 500;
     private static final int WINDOW_OFFSET_Y = 20;
-    private final Container mainPanel;
+    private final Container MAIN_PANEL;
     private JPanel top;
     private JPanel bottom;
     private JComboBox algorithmChooser;
@@ -39,7 +39,7 @@ public class Main extends JFrame {
     private boolean pauseButtonEnabled = false;
     private boolean clearWallsButtonEnabled = true;
     private boolean clearPathButtonEnabled = false;
-    private AbstractAlgorithm algotihm;
+    private AbstractAlgorithm algorithm;
     private final int MAX_SPEED = 50;
     private final int MIN_SPEED = 1;
     private final int MIN_TABLE_SIZE = 5;
@@ -125,7 +125,7 @@ public class Main extends JFrame {
         bottom = new JPanel();
         table = new Table(tableSize);
 
-        mainPanel.setLayout(new GridBagLayout());
+        MAIN_PANEL.setLayout(new GridBagLayout());
         top.setLayout(new GridBagLayout());
         bottom.setLayout(new GridBagLayout());
 
@@ -139,17 +139,17 @@ public class Main extends JFrame {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        mainPanel.add(top, c);
+        MAIN_PANEL.add(top, c);
 
         c.gridx = 0;
         c.gridy = 1;
         c.weighty = 6;
-        mainPanel.add(table, c);
+        MAIN_PANEL.add(table, c);
 
         c.gridx = 0;
         c.gridy = 2;
         c.weighty = 1;
-        mainPanel.add(bottom, c);
+        MAIN_PANEL.add(bottom, c);
         System.out.println("uj ablak");
     }
 
@@ -160,7 +160,7 @@ public class Main extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 if (sizeChooserEnabled) {
                     tableSize = (int) sizeChooser.getValue();
-                    mainPanel.removeAll();
+                    MAIN_PANEL.removeAll();
                     createWindow();
                     addListeners();
                     revalidate();
@@ -169,6 +169,7 @@ public class Main extends JFrame {
             }
         });
 
+        Main window = this;
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -187,12 +188,13 @@ public class Main extends JFrame {
 
                 String choice = (String) algorithmChooser.getSelectedItem();
                 if (choice.equals("Moore")) {
-                    algotihm = new Moore(table);
+                    algorithm = new Moore(table);
                 } else {
-                    algotihm = new AStar(table);
+                    algorithm = new AStar(table);
                 }
+                algorithm.addAlgorithmListener(window);
 
-                algotihm.start();
+                algorithm.start();
             }
         });
 
@@ -201,10 +203,10 @@ public class Main extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (pauseOrResume) {
                     pauseOrResume = false;
-                    algotihm.suspend();
+                    algorithm.suspend();
                 } else {
                     pauseOrResume = true;
-                    algotihm.resume();
+                    algorithm.resume();
                 }
                 validateControls();
             }
@@ -213,19 +215,9 @@ public class Main extends JFrame {
         stopButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("stop");
-                algorithmChooserEnabled = true;
-                sizeChooserEnabled = true;
-                startButtonEnabled = true;
-                pauseOrResume = true;
-                stopButtonEnabled = false;
-                pauseButtonEnabled = false;
-                clearPathButtonEnabled = true;
-                clearWallsButtonEnabled = true;
-                validateControls();
-                table.setListenersEnabled(true);
+                AlgorithmFinished();
 
-                algotihm.stop();
+                algorithm.stop();
             }
         });
 
@@ -240,6 +232,7 @@ public class Main extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 clearPath();
+                table.setListenersEnabled(true);
             }
         });
 
@@ -286,10 +279,10 @@ public class Main extends JFrame {
     }
 
     Main() {
-        mainPanel = getContentPane();
+        MAIN_PANEL = getContentPane();
         createWindow();
         addListeners();
-        this.setContentPane(mainPanel);
+        this.setContentPane(MAIN_PANEL);
     }
 
     public static void main(String[] args) {
@@ -298,5 +291,20 @@ public class Main extends JFrame {
         MainWindow.setBounds(WINDOW_OFFSET_X, WINDOW_OFFSET_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
         MainWindow.setTitle(TITLE);
         MainWindow.setVisible(true);
+    }
+
+    @Override
+    public void AlgorithmFinished() {
+        System.out.println("finisheddddd");
+        algorithmChooserEnabled = true;
+        sizeChooserEnabled = true;
+        startButtonEnabled = true;
+        pauseOrResume = true;
+        stopButtonEnabled = false;
+        pauseButtonEnabled = false;
+        clearPathButtonEnabled = true;
+        clearWallsButtonEnabled = true;
+        validateControls();
+        table.setListenersEnabled(false);
     }
 }

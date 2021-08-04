@@ -1,10 +1,13 @@
 package Algorithms;
 
+import Window.AlgorithmListener;
 import Window.Square;
 import Window.Table;
 
 import javax.swing.*;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 abstract public class AbstractAlgorithm implements Runnable {
     protected Table table;
@@ -16,22 +19,21 @@ abstract public class AbstractAlgorithm implements Runnable {
     protected Square[][] previous;
     protected volatile static int delay;
     protected Square pathTracerSquare;
-    private static String errorMessage;
-
-    public static String getErrorMessage() {
-        return errorMessage;
-    }
+    protected LinkedList<AlgorithmListener> AlgorithmListeners;
+    protected Instant time;
 
     public AbstractAlgorithm(Table table) {
         this.table = table;
         squares = table.squares;
         previous = new Square[squares.size()][squares.size()];
+        AlgorithmListeners = new LinkedList<>();
     }
 
     abstract protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException;
 
     @Override
     public void run() {
+        time = Instant.now();
         Thread thisThread = Thread.currentThread();
         while (thread == thisThread) {
             while (isSuspended) {
@@ -46,13 +48,19 @@ abstract public class AbstractAlgorithm implements Runnable {
             try {
                 nextIteration();
             } catch (InterruptedException | AlgorithmFinishedException e) {
-                errorMessage = "Done";
                 System.out.println(e.getMessage());
+                for (AlgorithmListener listener : AlgorithmListeners) {
+                    listener.AlgorithmFinished();
+                }
                 break;
             } catch (PathNotFoundException e) {
                 System.out.println(e.getMessage());
-                errorMessage = "Path not found";
-                //JOptionPane.showMessageDialog(, "You just opened a dialog.", DIALOG_TITLE, DIALOG_ICON);
+                JOptionPane.showMessageDialog(table, "Path not found");
+                synchronized (this) {
+                    for (AlgorithmListener listener : AlgorithmListeners) {
+                        listener.AlgorithmFinished();
+                    }
+                }
                 break;
             }
         }
@@ -128,6 +136,14 @@ abstract public class AbstractAlgorithm implements Runnable {
 
     public static void setDelay(int delay) {
         AbstractAlgorithm.delay = delay;
+    }
+
+    public synchronized void addAlgorithmListener(AlgorithmListener listener) {
+        AlgorithmListeners.add(listener);
+    }
+
+    public synchronized void removeAlgorithmListener(AlgorithmListener listener) {
+        AlgorithmListeners.remove(listener);
     }
 
     protected class AlgorithmFinishedException extends Exception {
