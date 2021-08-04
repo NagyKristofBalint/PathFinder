@@ -10,10 +10,9 @@ public class Moore extends AbstractAlgorithm {
     private final int size;
     private final int[][] distance;
     private final LinkedList<Square> queue;
-    private Square pathTracerSquare;
 
-    public Moore(Table table, ArrayList<ArrayList<Square>> squares) {
-        super(table, squares);
+    public Moore(Table table) {
+        super(table);
         size = squares.size();
         previous = new Square[size][size];
         distance = new int[size][size];

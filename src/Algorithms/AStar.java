@@ -6,8 +6,8 @@ import Window.Table;
 import java.util.ArrayList;
 
 public class AStar extends AbstractAlgorithm {
-    public AStar(Table table, ArrayList<ArrayList<Square>> squares) {
-        super(table,squares);
+    public AStar(Table table) {
+        super(table);
     }
 
     @Override

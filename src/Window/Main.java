@@ -160,9 +160,9 @@ public class Main extends JFrame {
 
                 String choice = (String) algorithmChooser.getSelectedItem();
                 if (choice.equals("Moore")) {
-                    algotihm = new Moore(table, table.squares);
+                    algotihm = new Moore(table);
                 } else {
-                    algotihm = new AStar(table, table.squares);
+                    algotihm = new AStar(table);
                 }
 
                 algotihm.start();

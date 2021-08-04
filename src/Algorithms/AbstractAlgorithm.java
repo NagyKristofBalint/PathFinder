@@ -8,22 +8,24 @@ import java.util.ArrayList;
 
 abstract public class AbstractAlgorithm implements Runnable {
     protected Table table;
-    protected ArrayList<ArrayList<Square>> squares;
     protected volatile Thread thread;
+    protected ArrayList<ArrayList<Square>> squares;
     protected volatile boolean isSuspended = false;
     protected volatile boolean pathFound = false;
     protected volatile boolean backTraceFinished = false;
     protected Square[][] previous;
     protected volatile static int delay;
+    protected Square pathTracerSquare;
     private static String errorMessage;
+
 
     public static String getErrorMessage() {
         return errorMessage;
     }
 
-    public AbstractAlgorithm(Table table, ArrayList<ArrayList<Square>> squares) {
+    public AbstractAlgorithm(Table table) {
         this.table = table;
-        this.squares = squares;
+        squares = table.squares;
     }
 
     abstract protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException;
@@ -81,7 +83,7 @@ abstract public class AbstractAlgorithm implements Runnable {
         int j = current.y;
         ArrayList<Square> neighbours = new ArrayList<>();
         try {
-            Square right = table.squares.get(i).get(j + 1);
+            Square right = squares.get(i).get(j + 1);
             if (!right.isWall()) {
                 neighbours.add(right);
             }
@@ -89,7 +91,7 @@ abstract public class AbstractAlgorithm implements Runnable {
         }
 
         try {
-            Square left = table.squares.get(i).get(j - 1);
+            Square left = squares.get(i).get(j - 1);
             if (!left.isWall()) {
                 neighbours.add(left);
             }
@@ -97,7 +99,7 @@ abstract public class AbstractAlgorithm implements Runnable {
         }
 
         try {
-            Square down = table.squares.get(i + 1).get(j);
+            Square down = squares.get(i + 1).get(j);
             if (!down.isWall()) {
                 neighbours.add(down);
             }
@@ -105,7 +107,7 @@ abstract public class AbstractAlgorithm implements Runnable {
         }
 
         try {
-            Square up = table.squares.get(i - 1).get(j);
+            Square up = squares.get(i - 1).get(j);
             if (!up.isWall()) {
                 neighbours.add(up);
             }
