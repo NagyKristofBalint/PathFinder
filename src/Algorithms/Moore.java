@@ -1,5 +1,5 @@
 package Algorithms;
-alma
+alma maci
 import Window.Square;
 import Window.Table;
 
