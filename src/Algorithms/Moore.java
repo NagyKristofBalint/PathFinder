@@ -39,24 +39,6 @@ public class Moore extends AbstractAlgorithm {
                 current = queue.pollFirst();
                 for (Square neighbour : getNeighboursOf(current)) {
                     if (distance[neighbour.x][neighbour.y] == -1) {
-                        /*if (!isFinish(neighbour)) {
-                            neighbour.setBackground(Table.MARKER_COLOR);
-                        }
-                        Thread.sleep(delay * 2L);
-                        queue.add(neighbour);
-                        distance[neighbour.x][neighbour.y] = distance[current.x][current.y] + 1;
-                        previous[neighbour.x][neighbour.y] = current;
-                        neighbour.setBackground(Table.REMAINING_COLOR);
-                        if (isStart(neighbour)) {
-                            neighbour.setBackground(Table.START_COLOR);
-                        } else if (isFinish(neighbour)) {
-                            neighbour.setBackground(Table.FINISH_COLOR);
-                        }
-                        Thread.sleep(delay);
-                        if (isFinish(neighbour)) {
-                            pathFound = true;
-                            break;
-                        }*/
                         if (!isFinish(neighbour)) {
                             neighbour.setBackground(Table.MARKER_COLOR);
                         }
