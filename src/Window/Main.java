@@ -8,11 +8,12 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class Main extends JFrame {
 
     private static final String TITLE = "Path Finder 1.0";
-    private static final int WINDOW_WIDTH = 500;
+    private static final int WINDOW_WIDTH = 525;
     private static final int WINDOW_HEIGHT = 780;
     private static final int WINDOW_OFFSET_X = 500;
     private static final int WINDOW_OFFSET_Y = 20;
@@ -25,16 +26,19 @@ public class Main extends JFrame {
     private JButton startButton;
     private JButton pauseButton;
     private JButton stopButton;
-    private JButton clearButton;
+    private JButton clearPathButton;
+    private JButton clearWallsButton;
     private JSlider speedSlider;
     private Table table;
-    private int tableSize = 10;
+    private int tableSize = 25;
     private boolean algorithmChooserEnabled = true;
     private boolean sizeChooserEnabled = true;
     private boolean startButtonEnabled = true;
     private boolean pauseOrResume = true;
     private boolean stopButtonEnabled = false;
     private boolean pauseButtonEnabled = false;
+    private boolean clearWallsButtonEnabled = true;
+    private boolean clearPathButtonEnabled = false;
     private AbstractAlgorithm algotihm;
     private final int MAX_SPEED = 50;
     private final int MIN_SPEED = 1;
@@ -76,7 +80,8 @@ public class Main extends JFrame {
         pauseButton = new JButton("Pause");
         stopButton = new JButton("Stop");
         speedSlider = new JSlider(MIN_SPEED - 1, MAX_SPEED - 1);
-        clearButton = new JButton("Clear");
+        clearPathButton = new JButton("Clear Path");
+        clearWallsButton = new JButton("Clear Walls");
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridx = 0;
@@ -104,10 +109,15 @@ public class Main extends JFrame {
         constraints.ipady = 20;
         bottom.add(speedPanel, constraints);
 
+        JPanel clearPanel = new JPanel();
+        clearPanel.setLayout(new GridLayout(1, 2, 20, 0));
+        clearPanel.add(clearPathButton);
+        clearPanel.add(clearWallsButton);
+        constraints.gridwidth = 3;
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.ipady = 0;
-        bottom.add(clearButton, constraints);
+        bottom.add(clearPanel, constraints);
     }
 
     private void createWindow() {
@@ -144,16 +154,33 @@ public class Main extends JFrame {
     }
 
     private void addListeners() {
+
+        sizeChooser.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (sizeChooserEnabled) {
+                    tableSize = (int) sizeChooser.getValue();
+                    mainPanel.removeAll();
+                    createWindow();
+                    addListeners();
+                    revalidate();
+                    System.out.println("spinner");
+                }
+            }
+        });
+
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                System.out.println("start");
+                clearPath();
                 algorithmChooserEnabled = false;
                 sizeChooserEnabled = false;
                 startButtonEnabled = false;
                 pauseOrResume = true;
                 pauseButtonEnabled = true;
                 stopButtonEnabled = true;
+                clearWallsButtonEnabled = false;
+                clearPathButtonEnabled = false;
                 validateControls();
                 table.setListenersEnabled(false);
                 AbstractAlgorithm.setDelay(MAX_SPEED - speedSlider.getValue());
@@ -166,23 +193,6 @@ public class Main extends JFrame {
                 }
 
                 algotihm.start();
-            }
-        });
-
-        stopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("stop");
-                algorithmChooserEnabled = true;
-                sizeChooserEnabled = true;
-                startButtonEnabled = false;
-                pauseOrResume = true;
-                stopButtonEnabled = false;
-                pauseButtonEnabled = false;
-                validateControls();
-                table.setListenersEnabled(true);
-
-                algotihm.stop();
             }
         });
 
@@ -200,6 +210,25 @@ public class Main extends JFrame {
             }
         });
 
+        stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("stop");
+                algorithmChooserEnabled = true;
+                sizeChooserEnabled = true;
+                startButtonEnabled = true;
+                pauseOrResume = true;
+                stopButtonEnabled = false;
+                pauseButtonEnabled = false;
+                clearPathButtonEnabled = true;
+                clearWallsButtonEnabled = true;
+                validateControls();
+                table.setListenersEnabled(true);
+
+                algotihm.stop();
+            }
+        });
+
         speedSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -207,26 +236,37 @@ public class Main extends JFrame {
             }
         });
 
-        sizeChooser.addChangeListener(new ChangeListener() {
+        clearPathButton.addActionListener(new ActionListener() {
             @Override
-            public void stateChanged(ChangeEvent e) {
-                if (startButtonEnabled) {
-                    tableSize = (int) sizeChooser.getValue();
-                    mainPanel.removeAll();
-                    createWindow();
-                    addListeners();
-                    revalidate();
-                    System.out.println("spinner");
+            public void actionPerformed(ActionEvent e) {
+                clearPath();
+            }
+        });
+
+        clearWallsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (ArrayList<Square> row : table.squares) {
+                    for (Square s : row) {
+                        if(s.isWall()){
+                            s.makeWall();
+                        }
+                    }
                 }
             }
         });
     }
 
-    Main() {
-        mainPanel = getContentPane();
-        createWindow();
-        addListeners();
-        this.setContentPane(mainPanel);
+    private void clearPath(){
+        JPanel helper = new JPanel();
+        for (ArrayList<Square> row : table.squares) {
+            for (Square s : row) {
+                if (s.getBackground() == Table.REMAINING_COLOR || s.getBackground() == Table.PATH_COLOR ||
+                        s.getBackground() == Table.MARKER_COLOR) {
+                    s.setBackground(helper.getBackground());
+                }
+            }
+        }
     }
 
     private void validateControls() {
@@ -241,6 +281,15 @@ public class Main extends JFrame {
             pauseButton.setText("Resume");
         }
         stopButton.setEnabled(stopButtonEnabled);
+        clearPathButton.setEnabled(clearPathButtonEnabled);
+        clearWallsButton.setEnabled(clearWallsButtonEnabled);
+    }
+
+    Main() {
+        mainPanel = getContentPane();
+        createWindow();
+        addListeners();
+        this.setContentPane(mainPanel);
     }
 
     public static void main(String[] args) {

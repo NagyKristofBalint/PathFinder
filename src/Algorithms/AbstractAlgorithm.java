@@ -18,7 +18,6 @@ abstract public class AbstractAlgorithm implements Runnable {
     protected Square pathTracerSquare;
     private static String errorMessage;
 
-
     public static String getErrorMessage() {
         return errorMessage;
     }
@@ -26,6 +25,7 @@ abstract public class AbstractAlgorithm implements Runnable {
     public AbstractAlgorithm(Table table) {
         this.table = table;
         squares = table.squares;
+        previous = new Square[squares.size()][squares.size()];
     }
 
     abstract protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException;
@@ -47,6 +47,7 @@ abstract public class AbstractAlgorithm implements Runnable {
                 nextIteration();
             } catch (InterruptedException | AlgorithmFinishedException e) {
                 errorMessage = "Done";
+                System.out.println(e.getMessage());
                 break;
             } catch (PathNotFoundException e) {
                 System.out.println(e.getMessage());

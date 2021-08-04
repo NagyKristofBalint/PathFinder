@@ -3,18 +3,15 @@ package Algorithms;
 import Window.Square;
 import Window.Table;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Moore extends AbstractAlgorithm {
-    private final int size;
     private final int[][] distance;
     private final LinkedList<Square> queue;
 
     public Moore(Table table) {
         super(table);
-        size = squares.size();
-        previous = new Square[size][size];
+        int size = squares.size();
         distance = new int[size][size];
         for (int i = 0; i < size; ++i) {
             for (int j = 0; j < size; ++j) {

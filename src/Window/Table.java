@@ -22,7 +22,6 @@ public class Table extends JPanel {
         setFinishX(size - 1);
         setFinishY(size - 1);
 
-        Square.setTableSize(size);
         Square.setTable(this);
 
         setLayout(new GridLayout(size, size));
@@ -35,9 +34,6 @@ public class Table extends JPanel {
                 add(square);
             }
         }
-
-
-        //if()
 
         squares.get(getStartX()).get(getStartY()).setBackground(START_COLOR);
         squares.get(getFinishX()).get(getFinishY()).setBackground(FINISH_COLOR);

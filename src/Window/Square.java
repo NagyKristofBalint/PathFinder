@@ -13,7 +13,6 @@ public class Square extends JPanel {
     private static volatile boolean startPressed = false;
     private static volatile boolean finishPressed = false;
     private static boolean listenersEnabled = true;
-    private static int tableSize;
     private static Color defaultBackgroundColor;
     private static Table table;
     private static int previousX;
@@ -106,7 +105,7 @@ public class Square extends JPanel {
         });
     }
 
-    private void makeWall() {
+    public void makeWall() {
         if (!isStart() && !isFinish()) {
             if (!isWall) {
                 isWall = true;
@@ -118,10 +117,6 @@ public class Square extends JPanel {
         }
     }
 
-    public boolean isWall() {
-        return isWall;
-    }
-
     private boolean isStart() {
         return (x == table.getStartX() && y == table.getStartY());
     }
@@ -130,12 +125,12 @@ public class Square extends JPanel {
         return (x == table.getFinishX() && y == table.getFinishY());
     }
 
-    public static void setListenersEnabled(boolean isEnabled) {
-        listenersEnabled = isEnabled;
+    public boolean isWall() {
+        return isWall;
     }
 
-    public static void setTableSize(int size) {
-        tableSize = size;
+    public static void setListenersEnabled(boolean isEnabled) {
+        listenersEnabled = isEnabled;
     }
 
     public static void setTable(Table table) {
