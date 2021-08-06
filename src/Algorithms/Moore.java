@@ -9,8 +9,8 @@ public class Moore extends AbstractAlgorithm {
     private final int[][] distance;
     private final LinkedList<Square> queue;
 
-    public Moore(Table table) {
-        super(table);
+    public Moore(Table table, boolean crossDirectionEnabled) {
+        super(table, crossDirectionEnabled);
         int size = squares.size();
         distance = new int[size][size];
         for (int i = 0; i < size; ++i) {
@@ -38,6 +38,7 @@ public class Moore extends AbstractAlgorithm {
                         if (!isFinish(neighbour)) {
                             neighbour.setBackground(Table.MARKER_COLOR);
                         }
+                        notifyCounterListeners();
                         Thread.sleep(delay * 2L);
                         queue.add(neighbour);
                         distance[neighbour.x][neighbour.y] = distance[current.x][current.y] + 1;

@@ -6,8 +6,8 @@ import Window.Table;
 import java.util.ArrayList;
 
 public class AStar extends AbstractAlgorithm {
-    public AStar(Table table) {
-        super(table);
+    public AStar(Table table, boolean crossDirectionEnabled) {
+        super(table, crossDirectionEnabled);
     }
 
     @Override

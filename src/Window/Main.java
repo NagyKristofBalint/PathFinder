@@ -22,14 +22,16 @@ public class Main extends JFrame implements AlgorithmListener{
     private JPanel bottom;
     private JComboBox algorithmChooser;
     private JSpinner sizeChooser;
-    private JLabel timeLabel;
+    private JLabel stepCountLabel;
     private JButton startButton;
     private JButton pauseButton;
     private JButton stopButton;
     private JButton clearPathButton;
     private JButton clearWallsButton;
     private JSlider speedSlider;
+    private JCheckBox enableCrossDirectionCheckBox;
     private Table table;
+    private int stepCount = 0;
     private int tableSize = 25;
     private boolean algorithmChooserEnabled = true;
     private boolean sizeChooserEnabled = true;
@@ -39,6 +41,7 @@ public class Main extends JFrame implements AlgorithmListener{
     private boolean pauseButtonEnabled = false;
     private boolean clearWallsButtonEnabled = true;
     private boolean clearPathButtonEnabled = false;
+    private boolean crossDirectionEnabled = true;
     private AbstractAlgorithm algorithm;
     private final int MAX_SPEED = 50;
     private final int MIN_SPEED = 1;
@@ -46,33 +49,41 @@ public class Main extends JFrame implements AlgorithmListener{
     private final int MAX_TABLE_SIZE = 50;
 
     private void createTopSide() {
-        timeLabel = new JLabel("00:00:00");
+        stepCountLabel = new JLabel("0");
         String[] algorithmStrings = {"Moore", "A*"};
         algorithmChooser = new JComboBox(algorithmStrings);
-        GridBagConstraints constraints = new GridBagConstraints();
         sizeChooser = new JSpinner(new SpinnerNumberModel(tableSize, MIN_TABLE_SIZE, MAX_TABLE_SIZE, 1));
+        GridBagConstraints constraints = new GridBagConstraints();
+        enableCrossDirectionCheckBox = new JCheckBox("Cross direction");
+
         constraints.weightx = 1;
         constraints.gridy = 0;
         constraints.gridx = 0;
         constraints.ipady = 10;
-        top.add(new JLabel("Elapsed Time"), constraints);
+        top.add(new JLabel("Step Count"), constraints);
 
         constraints.gridx = 1;
         constraints.ipady = 0;
         top.add(new JLabel("Algorithm"), constraints);
 
         constraints.gridx = 2;
-        top.add(new JLabel("Table Size"), constraints);
+        top.add(new JLabel("Table size"), constraints);
 
         constraints.gridy = 1;
         constraints.gridx = 0;
-        top.add(timeLabel, constraints);
+        top.add(stepCountLabel, constraints);
 
         constraints.gridx = 1;
         top.add(algorithmChooser, constraints);
 
         constraints.gridx = 2;
         top.add(sizeChooser, constraints);
+
+        constraints.gridx = 3;
+        constraints.gridy = 0;
+        constraints.gridheight = 2;
+        enableCrossDirectionCheckBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        top.add(enableCrossDirectionCheckBox, constraints);
     }
 
     private void createBottomSide() {
@@ -150,7 +161,6 @@ public class Main extends JFrame implements AlgorithmListener{
         c.gridy = 2;
         c.weighty = 1;
         MAIN_PANEL.add(bottom, c);
-        System.out.println("uj ablak");
     }
 
     private void addListeners() {
@@ -164,12 +174,12 @@ public class Main extends JFrame implements AlgorithmListener{
                     createWindow();
                     addListeners();
                     revalidate();
-                    System.out.println("spinner");
+                    table.setListenersEnabled(true);
                 }
             }
         });
 
-        Main window = this;
+        Main thisWindow = this;
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -182,17 +192,20 @@ public class Main extends JFrame implements AlgorithmListener{
                 stopButtonEnabled = true;
                 clearWallsButtonEnabled = false;
                 clearPathButtonEnabled = false;
+                crossDirectionEnabled = false;
                 validateControls();
                 table.setListenersEnabled(false);
                 AbstractAlgorithm.setDelay(MAX_SPEED - speedSlider.getValue());
 
                 String choice = (String) algorithmChooser.getSelectedItem();
+
+                crossDirectionEnabled = enableCrossDirectionCheckBox.isSelected();
                 if (choice.equals("Moore")) {
-                    algorithm = new Moore(table);
+                    algorithm = new Moore(table, crossDirectionEnabled);
                 } else {
-                    algorithm = new AStar(table);
+                    algorithm = new AStar(table, crossDirectionEnabled);
                 }
-                algorithm.addAlgorithmListener(window);
+                algorithm.addAlgorithmListener(thisWindow);
 
                 algorithm.start();
             }
@@ -216,7 +229,6 @@ public class Main extends JFrame implements AlgorithmListener{
             @Override
             public void actionPerformed(ActionEvent e) {
                 AlgorithmFinished();
-
                 algorithm.stop();
             }
         });
@@ -266,7 +278,6 @@ public class Main extends JFrame implements AlgorithmListener{
         algorithmChooser.setEnabled(algorithmChooserEnabled);
         sizeChooser.setEnabled(sizeChooserEnabled);
         startButton.setEnabled(startButtonEnabled);
-        System.out.println("csere");
         pauseButton.setEnabled(pauseButtonEnabled);
         if (pauseOrResume) {
             pauseButton.setText("Pause");
@@ -276,6 +287,7 @@ public class Main extends JFrame implements AlgorithmListener{
         stopButton.setEnabled(stopButtonEnabled);
         clearPathButton.setEnabled(clearPathButtonEnabled);
         clearWallsButton.setEnabled(clearWallsButtonEnabled);
+        enableCrossDirectionCheckBox.setEnabled(crossDirectionEnabled);
     }
 
     Main() {
@@ -285,17 +297,8 @@ public class Main extends JFrame implements AlgorithmListener{
         this.setContentPane(MAIN_PANEL);
     }
 
-    public static void main(String[] args) {
-        Main MainWindow = new Main();
-        MainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        MainWindow.setBounds(WINDOW_OFFSET_X, WINDOW_OFFSET_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
-        MainWindow.setTitle(TITLE);
-        MainWindow.setVisible(true);
-    }
-
     @Override
     public void AlgorithmFinished() {
-        System.out.println("finisheddddd");
         algorithmChooserEnabled = true;
         sizeChooserEnabled = true;
         startButtonEnabled = true;
@@ -304,7 +307,21 @@ public class Main extends JFrame implements AlgorithmListener{
         pauseButtonEnabled = false;
         clearPathButtonEnabled = true;
         clearWallsButtonEnabled = true;
+        crossDirectionEnabled = true;
         validateControls();
         table.setListenersEnabled(false);
+    }
+
+    @Override
+    public void valueChanged(CounterEvent e) {
+        stepCountLabel.setText("" + e.getValue());
+    }
+
+    public static void main(String[] args) {
+        Main MainWindow = new Main();
+        MainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        MainWindow.setBounds(WINDOW_OFFSET_X, WINDOW_OFFSET_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
+        MainWindow.setTitle(TITLE);
+        MainWindow.setVisible(true);
     }
 }

@@ -1,16 +1,14 @@
 package Algorithms;
 
-import Window.AlgorithmListener;
-import Window.Square;
-import Window.Table;
+import Window.*;
 
 import javax.swing.*;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 abstract public class AbstractAlgorithm implements Runnable {
     protected Table table;
+    protected int steps = 0;
     protected volatile Thread thread;
     protected ArrayList<ArrayList<Square>> squares;
     protected volatile boolean isSuspended = false;
@@ -19,21 +17,21 @@ abstract public class AbstractAlgorithm implements Runnable {
     protected Square[][] previous;
     protected volatile static int delay;
     protected Square pathTracerSquare;
-    protected LinkedList<AlgorithmListener> AlgorithmListeners;
-    protected Instant time;
+    protected LinkedList<AlgorithmListener> algorithmListeners;
+    private final boolean crossDirectionEnabled;
 
-    public AbstractAlgorithm(Table table) {
+    public AbstractAlgorithm(Table table, boolean crossDirectionEnabled) {
         this.table = table;
         squares = table.squares;
         previous = new Square[squares.size()][squares.size()];
-        AlgorithmListeners = new LinkedList<>();
+        algorithmListeners = new LinkedList<>();
+        this.crossDirectionEnabled = crossDirectionEnabled;
     }
 
     abstract protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException;
 
     @Override
     public void run() {
-        time = Instant.now();
         Thread thisThread = Thread.currentThread();
         while (thread == thisThread) {
             while (isSuspended) {
@@ -46,23 +44,23 @@ abstract public class AbstractAlgorithm implements Runnable {
                 }
             }
             try {
+                //////////////////////////////
                 nextIteration();
+                //////////////////////////////
             } catch (InterruptedException | AlgorithmFinishedException e) {
-                System.out.println(e.getMessage());
-                for (AlgorithmListener listener : AlgorithmListeners) {
-                    listener.AlgorithmFinished();
-                }
+                notifyAlgorithmListeners();
                 break;
             } catch (PathNotFoundException e) {
-                System.out.println(e.getMessage());
                 JOptionPane.showMessageDialog(table, "Path not found");
-                synchronized (this) {
-                    for (AlgorithmListener listener : AlgorithmListeners) {
-                        listener.AlgorithmFinished();
-                    }
-                }
+                notifyAlgorithmListeners();
                 break;
             }
+        }
+    }
+
+    private synchronized void notifyAlgorithmListeners() {
+        for (AlgorithmListener listener : algorithmListeners) {
+            listener.AlgorithmFinished();
         }
     }
 
@@ -85,6 +83,12 @@ abstract public class AbstractAlgorithm implements Runnable {
     public synchronized void resume() {
         isSuspended = false;
         notifyAll();
+    }
+
+    protected synchronized void notifyCounterListeners() {
+        for (AlgorithmListener listener : algorithmListeners) {
+            listener.valueChanged(new CounterEvent(this, ++steps));
+        }
     }
 
     protected ArrayList<Square> getNeighboursOf(Square current) {
@@ -123,6 +127,41 @@ abstract public class AbstractAlgorithm implements Runnable {
         } catch (IndexOutOfBoundsException ignored) {
         }
 
+        ////////////////
+        if (crossDirectionEnabled) {
+            try {
+                Square left_up = squares.get(i - 1).get(j - 1);
+                if (!left_up.isWall()) {
+                    neighbours.add(left_up);
+                }
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+
+            try {
+                Square right_up = squares.get(i - 1).get(j + 1);
+                if (!right_up.isWall()) {
+                    neighbours.add(right_up);
+                }
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+
+            try {
+                Square left_down = squares.get(i + 1).get(j - 1);
+                if (!left_down.isWall()) {
+                    neighbours.add(left_down);
+                }
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+
+            try {
+                Square right_down = squares.get(i + 1).get(j + 1);
+                if (!right_down.isWall()) {
+                    neighbours.add(right_down);
+                }
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }
+
         return neighbours;
     }
 
@@ -139,11 +178,11 @@ abstract public class AbstractAlgorithm implements Runnable {
     }
 
     public synchronized void addAlgorithmListener(AlgorithmListener listener) {
-        AlgorithmListeners.add(listener);
+        algorithmListeners.add(listener);
     }
 
     public synchronized void removeAlgorithmListener(AlgorithmListener listener) {
-        AlgorithmListeners.remove(listener);
+        algorithmListeners.remove(listener);
     }
 
     protected class AlgorithmFinishedException extends Exception {
