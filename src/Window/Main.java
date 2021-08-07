@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class Main extends JFrame implements AlgorithmListener{
+public class Main extends JFrame implements AlgorithmListener {
 
     private static final String TITLE = "Path Finder 1.0";
     private static final int WINDOW_WIDTH = 525;
@@ -31,7 +31,7 @@ public class Main extends JFrame implements AlgorithmListener{
     private JSlider speedSlider;
     private JCheckBox enableCrossDirectionCheckBox;
     private Table table;
-    private int stepCount = 0;
+    private int stepCount;
     private int tableSize = 25;
     private boolean algorithmChooserEnabled = true;
     private boolean sizeChooserEnabled = true;
@@ -47,6 +47,14 @@ public class Main extends JFrame implements AlgorithmListener{
     private final int MIN_SPEED = 1;
     private final int MIN_TABLE_SIZE = 5;
     private final int MAX_TABLE_SIZE = 50;
+    private int speed = MAX_SPEED / 2;
+
+    Main() {
+        MAIN_PANEL = new JPanel();
+        createWindow();
+        addListeners();
+        setContentPane(MAIN_PANEL);
+    }
 
     private void createTopSide() {
         stepCountLabel = new JLabel("0");
@@ -90,7 +98,7 @@ public class Main extends JFrame implements AlgorithmListener{
         startButton = new JButton("Start");
         pauseButton = new JButton("Pause");
         stopButton = new JButton("Stop");
-        speedSlider = new JSlider(MIN_SPEED - 1, MAX_SPEED - 1);
+        speedSlider = new JSlider(MIN_SPEED - 1, MAX_SPEED - 1, speed);
         clearPathButton = new JButton("Clear Path");
         clearWallsButton = new JButton("Clear Walls");
         GridBagConstraints constraints = new GridBagConstraints();
@@ -133,8 +141,8 @@ public class Main extends JFrame implements AlgorithmListener{
 
     private void createWindow() {
         top = new JPanel();
-        bottom = new JPanel();
         table = new Table(tableSize);
+        bottom = new JPanel();
 
         MAIN_PANEL.setLayout(new GridBagLayout());
         top.setLayout(new GridBagLayout());
@@ -236,6 +244,7 @@ public class Main extends JFrame implements AlgorithmListener{
         speedSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
+                speed = speedSlider.getValue();
                 AbstractAlgorithm.setDelay(MAX_SPEED - speedSlider.getValue());
             }
         });
@@ -253,7 +262,7 @@ public class Main extends JFrame implements AlgorithmListener{
             public void actionPerformed(ActionEvent e) {
                 for (ArrayList<Square> row : table.squares) {
                     for (Square s : row) {
-                        if(s.isWall()){
+                        if (s.isWall()) {
                             s.makeWall();
                         }
                     }
@@ -262,7 +271,7 @@ public class Main extends JFrame implements AlgorithmListener{
         });
     }
 
-    private void clearPath(){
+    private void clearPath() {
         JPanel helper = new JPanel();
         for (ArrayList<Square> row : table.squares) {
             for (Square s : row) {
@@ -290,13 +299,6 @@ public class Main extends JFrame implements AlgorithmListener{
         enableCrossDirectionCheckBox.setEnabled(crossDirectionEnabled);
     }
 
-    Main() {
-        MAIN_PANEL = getContentPane();
-        createWindow();
-        addListeners();
-        this.setContentPane(MAIN_PANEL);
-    }
-
     @Override
     public void AlgorithmFinished() {
         algorithmChooserEnabled = true;
@@ -315,6 +317,7 @@ public class Main extends JFrame implements AlgorithmListener{
     @Override
     public void valueChanged(CounterEvent e) {
         stepCountLabel.setText("" + e.getValue());
+        stepCount = e.getValue();
     }
 
     public static void main(String[] args) {

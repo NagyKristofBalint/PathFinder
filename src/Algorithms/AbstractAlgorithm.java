@@ -32,42 +32,41 @@ abstract public class AbstractAlgorithm implements Runnable {
 
     @Override
     public void run() {
-        Thread thisThread = Thread.currentThread();
-        while (thread == thisThread) {
+        //while (!thread.isInterrupted()) {
+        while (true) {
             while (isSuspended) {
                 synchronized (this) {
                     try {
                         wait();
                     } catch (InterruptedException e) {
+                        thread.interrupt();
                         break;
                     }
                 }
             }
+
+            if (thread.isInterrupted()) {
+                break;
+            }
+
             try {
                 //////////////////////////////
                 nextIteration();
                 //////////////////////////////
             } catch (InterruptedException | AlgorithmFinishedException e) {
-                notifyAlgorithmListeners();
+                System.out.println(e.getMessage());
+                notifyAlgorithmStateListeners();
                 break;
             } catch (PathNotFoundException e) {
-                JOptionPane.showMessageDialog(table, "Path not found");
-                notifyAlgorithmListeners();
+                JOptionPane.showMessageDialog(table, e.getMessage());
+                notifyAlgorithmStateListeners();
                 break;
             }
         }
     }
 
-    private synchronized void notifyAlgorithmListeners() {
-        for (AlgorithmListener listener : algorithmListeners) {
-            listener.AlgorithmFinished();
-        }
-    }
-
     public void stop() {
-        Thread tmp = thread;
-        thread = null;
-        tmp.interrupt();
+        thread.interrupt();
     }
 
     public void start() {
@@ -85,9 +84,15 @@ abstract public class AbstractAlgorithm implements Runnable {
         notifyAll();
     }
 
-    protected synchronized void notifyCounterListeners() {
+    protected synchronized void notifyCounterListenersAndIncreaseCounter() {
         for (AlgorithmListener listener : algorithmListeners) {
             listener.valueChanged(new CounterEvent(this, ++steps));
+        }
+    }
+
+    private synchronized void notifyAlgorithmStateListeners() {
+        for (AlgorithmListener listener : algorithmListeners) {
+            listener.AlgorithmFinished();
         }
     }
 
@@ -127,7 +132,6 @@ abstract public class AbstractAlgorithm implements Runnable {
         } catch (IndexOutOfBoundsException ignored) {
         }
 
-        ////////////////
         if (crossDirectionEnabled) {
             try {
                 Square left_up = squares.get(i - 1).get(j - 1);
@@ -185,13 +189,13 @@ abstract public class AbstractAlgorithm implements Runnable {
         algorithmListeners.remove(listener);
     }
 
-    protected class AlgorithmFinishedException extends Exception {
+    protected static class AlgorithmFinishedException extends Exception {
         public AlgorithmFinishedException(String errorMessage) {
             super(errorMessage);
         }
     }
 
-    protected class PathNotFoundException extends Exception {
+    protected static class PathNotFoundException extends Exception {
         public PathNotFoundException(String errorMessage) {
             super(errorMessage);
         }

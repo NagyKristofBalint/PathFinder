@@ -38,7 +38,7 @@ public class Moore extends AbstractAlgorithm {
                         if (!isFinish(neighbour)) {
                             neighbour.setBackground(Table.MARKER_COLOR);
                         }
-                        notifyCounterListeners();
+                        notifyCounterListenersAndIncreaseCounter();
                         Thread.sleep(delay * 2L);
                         queue.add(neighbour);
                         distance[neighbour.x][neighbour.y] = distance[current.x][current.y] + 1;
