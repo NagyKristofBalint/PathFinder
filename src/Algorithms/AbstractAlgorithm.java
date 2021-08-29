@@ -32,20 +32,20 @@ abstract public class AbstractAlgorithm implements Runnable {
 
     @Override
     public void run() {
-        //while (!thread.isInterrupted()) {
         while (true) {
             while (isSuspended) {
                 synchronized (this) {
                     try {
                         wait();
                     } catch (InterruptedException e) {
+                        //The creation of an IntrerruptedException clears the intrerrupted flag, but I need it
                         thread.interrupt();
                         break;
                     }
                 }
             }
 
-            if (thread.isInterrupted()) {
+            if (Thread.interrupted()) {
                 break;
             }
 
@@ -90,16 +90,22 @@ abstract public class AbstractAlgorithm implements Runnable {
         }
     }
 
+    protected synchronized void notifyCounterListenersAndIncreaseCounter(int stepSize) {
+        for (AlgorithmListener listener : algorithmListeners) {
+            listener.valueChanged(new CounterEvent(this, steps + stepSize));
+        }
+    }
+
     private synchronized void notifyAlgorithmStateListeners() {
         for (AlgorithmListener listener : algorithmListeners) {
             listener.AlgorithmFinished();
         }
     }
 
-    protected ArrayList<Square> getNeighboursOf(Square current) {
+    protected LinkedList<Square> getNeighboursOf(Square current) {
         int i = current.x;
         int j = current.y;
-        ArrayList<Square> neighbours = new ArrayList<>();
+        LinkedList<Square> neighbours = new LinkedList<>();
         try {
             Square right = squares.get(i).get(j + 1);
             if (!right.isWall()) {

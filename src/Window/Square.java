@@ -28,7 +28,7 @@ public class Square extends JPanel {
         return (s.x == x && s.y == y);
     }
 
-    Square(int x, int y) {
+    public Square(int x, int y) {
         this.x = x;
         this.y = y;
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));

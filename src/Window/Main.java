@@ -29,7 +29,7 @@ public class Main extends JFrame implements AlgorithmListener {
     private JButton clearPathButton;
     private JButton clearWallsButton;
     private JSlider speedSlider;
-    private JCheckBox enableCrossDirectionCheckBox;
+    private JCheckBox enableDiagonalDirectionCheckBox;
     private Table table;
     private int stepCount;
     private int tableSize = 25;
@@ -41,7 +41,7 @@ public class Main extends JFrame implements AlgorithmListener {
     private boolean pauseButtonEnabled = false;
     private boolean clearWallsButtonEnabled = true;
     private boolean clearPathButtonEnabled = false;
-    private boolean crossDirectionEnabled = true;
+    private boolean diagonalDirectionEnabled = true;
     private AbstractAlgorithm algorithm;
     private final int MAX_SPEED = 50;
     private final int MIN_SPEED = 1;
@@ -58,11 +58,11 @@ public class Main extends JFrame implements AlgorithmListener {
 
     private void createTopSide() {
         stepCountLabel = new JLabel("0");
-        String[] algorithmStrings = {"Moore", "A*"};
+        String[] algorithmStrings = {"Moore/Dijkstra", "A*"};
         algorithmChooser = new JComboBox(algorithmStrings);
         sizeChooser = new JSpinner(new SpinnerNumberModel(tableSize, MIN_TABLE_SIZE, MAX_TABLE_SIZE, 1));
         GridBagConstraints constraints = new GridBagConstraints();
-        enableCrossDirectionCheckBox = new JCheckBox("Cross direction");
+        enableDiagonalDirectionCheckBox = new JCheckBox("Diagonal direction");
 
         constraints.weightx = 1;
         constraints.gridy = 0;
@@ -90,8 +90,8 @@ public class Main extends JFrame implements AlgorithmListener {
         constraints.gridx = 3;
         constraints.gridy = 0;
         constraints.gridheight = 2;
-        enableCrossDirectionCheckBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        top.add(enableCrossDirectionCheckBox, constraints);
+        enableDiagonalDirectionCheckBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        top.add(enableDiagonalDirectionCheckBox, constraints);
     }
 
     private void createBottomSide() {
@@ -200,18 +200,18 @@ public class Main extends JFrame implements AlgorithmListener {
                 stopButtonEnabled = true;
                 clearWallsButtonEnabled = false;
                 clearPathButtonEnabled = false;
-                crossDirectionEnabled = false;
+                diagonalDirectionEnabled = false;
                 validateControls();
                 table.setListenersEnabled(false);
                 AbstractAlgorithm.setDelay(MAX_SPEED - speedSlider.getValue());
 
                 String choice = (String) algorithmChooser.getSelectedItem();
 
-                crossDirectionEnabled = enableCrossDirectionCheckBox.isSelected();
-                if (choice.equals("Moore")) {
-                    algorithm = new Moore(table, crossDirectionEnabled);
+                diagonalDirectionEnabled = enableDiagonalDirectionCheckBox.isSelected();
+                if (choice.equals("Moore/Dijkstra")) {
+                    algorithm = new Moore(table, diagonalDirectionEnabled);
                 } else {
-                    algorithm = new AStar(table, crossDirectionEnabled);
+                    algorithm = new AStar(table, diagonalDirectionEnabled);
                 }
                 algorithm.addAlgorithmListener(thisWindow);
 
@@ -296,7 +296,7 @@ public class Main extends JFrame implements AlgorithmListener {
         stopButton.setEnabled(stopButtonEnabled);
         clearPathButton.setEnabled(clearPathButtonEnabled);
         clearWallsButton.setEnabled(clearWallsButtonEnabled);
-        enableCrossDirectionCheckBox.setEnabled(crossDirectionEnabled);
+        enableDiagonalDirectionCheckBox.setEnabled(diagonalDirectionEnabled);
     }
 
     @Override
@@ -309,7 +309,7 @@ public class Main extends JFrame implements AlgorithmListener {
         pauseButtonEnabled = false;
         clearPathButtonEnabled = true;
         clearWallsButtonEnabled = true;
-        crossDirectionEnabled = true;
+        diagonalDirectionEnabled = true;
         validateControls();
         table.setListenersEnabled(false);
     }
