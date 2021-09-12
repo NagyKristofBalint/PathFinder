@@ -43,6 +43,7 @@ public class Table extends JPanel {
         Square.setListenersEnabled(x);
     }
 
+
     public int getStartY() {
         return startY;
     }
@@ -73,5 +74,21 @@ public class Table extends JPanel {
 
     public void setFinishY(int finishY) {
         this.finishY = finishY;
+    }
+
+    public boolean isStart(Square current) {
+        return current.equals(getStart());
+    }
+
+    public boolean isFinish(Square current) {
+        return current.equals(getFinish());
+    }
+
+    public Square getStart() {
+        return squares.get(getStartX()).get(getStartY());
+    }
+
+    public Square getFinish() {
+        return squares.get(getFinishX()).get(getFinishY());
     }
 }

@@ -274,12 +274,12 @@ public class Main extends JFrame implements AlgorithmListener {
         JPanel helper = new JPanel();
         for (ArrayList<Square> row : table.squares) {
             for (Square s : row) {
-                if (s.getBackground() == Table.REMAINING_COLOR || s.getBackground() == Table.PATH_COLOR ||
-                        s.getBackground() == Table.MARKER_COLOR) {
+                if (!s.isWall())
                     s.setBackground(helper.getBackground());
-                }
             }
         }
+        table.getStart().setBackground(Table.START_COLOR);
+        table.getFinish().setBackground(Table.FINISH_COLOR);
     }
 
     private void validateControls() {

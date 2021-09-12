@@ -169,7 +169,7 @@ public class AStar extends AbstractAlgorithm {
             return Double.compare(f[square.x][square.y], f[o.square.x][o.square.y]);
         }
         //Transform it into Dijkstra's algorithm
-        /*public int compareTo(Element o) {
+       /*public int compareTo(Element o) {
             return Double.compare(g[square.x][square.y], g[o.square.x][o.square.y]);
         }*/
     }

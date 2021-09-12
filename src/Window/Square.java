@@ -31,7 +31,7 @@ public class Square extends JPanel {
     public Square(int x, int y) {
         this.x = x;
         this.y = y;
-        setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        setBorder(BorderFactory.createLineBorder(Table.WALL_COLOR, 1));
 
         addMouseListener(new MouseAdapter() {
             @Override
