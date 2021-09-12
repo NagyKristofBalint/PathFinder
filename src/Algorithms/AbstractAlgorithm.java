@@ -14,7 +14,7 @@ abstract public class AbstractAlgorithm implements Runnable {
     protected volatile boolean isSuspended = false;
     protected volatile boolean pathFound = false;
     protected volatile boolean backTraceFinished = false;
-    protected Square[][] previous;
+    protected Square[][] cameFrom;
     protected volatile static int delay;
     protected Square pathTracerSquare;
     protected LinkedList<AlgorithmListener> algorithmListeners;
@@ -23,7 +23,7 @@ abstract public class AbstractAlgorithm implements Runnable {
     public AbstractAlgorithm(Table table, boolean crossDirectionEnabled) {
         this.table = table;
         squares = table.squares;
-        previous = new Square[squares.size()][squares.size()];
+        cameFrom = new Square[squares.size()][squares.size()];
         algorithmListeners = new LinkedList<>();
         this.crossDirectionEnabled = crossDirectionEnabled;
     }
@@ -175,12 +175,20 @@ abstract public class AbstractAlgorithm implements Runnable {
         return neighbours;
     }
 
+    protected Square getStart() {
+        return squares.get(table.getStartX()).get(table.getStartY());
+    }
+
+    protected Square getFinish() {
+        return squares.get(table.getFinishX()).get(table.getFinishY());
+    }
+
     protected boolean isStart(Square current) {
-        return current.equals(squares.get(table.getStartX()).get(table.getStartY()));
+        return current.equals(getStart());
     }
 
     protected boolean isFinish(Square current) {
-        return current.equals(squares.get(table.getFinishX()).get(table.getFinishY()));
+        return current.equals(getFinish());
     }
 
     public static void setDelay(int delay) {

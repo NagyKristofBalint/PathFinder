@@ -11,7 +11,8 @@ import static java.lang.Math.sqrt;
 
 public class AStar extends AbstractAlgorithm {
 
-    private final int[][] distance;
+    private final int[][] g;
+    private final double[][] f;
     private boolean[][] used;
     private PriorityQueue<Element> priorityQueue;
     private Square current;
@@ -21,72 +22,25 @@ public class AStar extends AbstractAlgorithm {
         super(table, crossDirectionEnabled);
         int size = squares.size();
         used = new boolean[size][size];
-        distance = new int[size][size];
+        g = new int[size][size];
+        f = new double[size][size];
         for (int i = 0; i < size; ++i) {
             for (int j = 0; j < size; ++j) {
-                distance[i][j] = -1;
+                g[i][j] = Integer.MAX_VALUE;
+                f[i][j] = Double.MAX_VALUE;
             }
         }
-        current = squares.get(table.getStartX()).get(table.getStartY());
 
         priorityQueue = new PriorityQueue<>(size * size, DESCENDING_ORDER);
-        priorityQueue.add(new Element(squares.get(table.getStartX()).get(table.getStartY())));
-        distance[table.getStartX()][table.getStartY()] = 0;
+        priorityQueue.add(new Element(getStart()));
+        g[table.getStartX()][table.getStartY()] = 0;
+        f[table.getStartX()][table.getStartY()] = euclideanHeuristic(getStart());
 
-        previous[table.getStartX()][table.getStartY()] = new Square(-1, -1);
-        pathTracerSquare = squares.get(table.getFinishX()).get(table.getFinishY());
+        cameFrom[table.getStartX()][table.getStartY()] = new Square(-1, -1);
+        pathTracerSquare = getFinish();
     }
 
-    /*@Override
-    protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException {
-        if (!pathFound) {
-            if (!priorityQueue.isEmpty()) {
-                neighbours = getNeighboursOf(current);
-                for (Square neighbour : neighbours) {
-                    priorityQueue.add(new Element(neighbour));
-                    if (!isStart(neighbour) && !isFinish(neighbour) && previous[neighbour.x][neighbour.y] == null) {
-                        neighbour.setBackground(Table.MARKER_COLOR);
-                    }
-                }
-                Thread.sleep(delay * 2L);
-                Square next = priorityQueue.poll().square;
-                while (previous[next.x][next.y] != null) {
-                    next.setBackground(Table.REMAINING_COLOR);
-                    if (priorityQueue.isEmpty()) {
-                        throw new PathNotFoundException("Path not found");
-                    }
-                    next = priorityQueue.poll().square;
-                }
-                notifyCounterListenersAndIncreaseCounter();
-                previous[next.x][next.y] = current;
-                distance[next.x][next.y] = distance[current.x][current.y] + 1;
-                if (isFinish(next)) {
-                    pathFound = true;
-                } else {
-                    current = next;
-                    current.setBackground(Table.REMAINING_COLOR);
-                    Thread.sleep(delay);
-                }
-            } else {
-                throw new PathNotFoundException("Path not found");
-            }
-        } else {
-            if (!backTraceFinished) {
-                if (!isStart(pathTracerSquare)) {
-                    pathTracerSquare = previous[pathTracerSquare.x][pathTracerSquare.y];
-                    pathTracerSquare.setBackground(Table.PATH_COLOR);
-                } else {
-                    pathTracerSquare.setBackground(Table.START_COLOR);
-                    backTraceFinished = true;
-                }
-                Thread.sleep(delay);
-            } else {
-                throw new AlgorithmFinishedException("Moore ended");
-            }
-        }
-    }*/
-
-    @Override
+    /* @Override
     protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException {
         if (!pathFound) {
             if (!priorityQueue.isEmpty()) {
@@ -99,12 +53,13 @@ public class AStar extends AbstractAlgorithm {
                         neighbour.setBackground(Table.MARKER_COLOR);
                     }
                     if (!used[neighbour.x][neighbour.y])
-                        previous[neighbour.x][neighbour.y] = current;
+                        cameFrom[neighbour.x][neighbour.y] = current;
                 }
                 Thread.sleep(delay * 2L);
                 Square next = priorityQueue.poll().square;
-                while (used[next.x][next.y]/* || isStart(next)*/) {
-                    //while (previous[next.x][next.y] != null) {
+                while (used[next.x][next.y]) {
+                    //while (used[next.x][next.y] || isStart(next)) {
+                    //while (cameFrom[next.x][next.y] != null) {
                     next.setBackground(Table.REMAINING_COLOR);
                     if (priorityQueue.isEmpty()) {
                         System.out.println("alma");
@@ -114,8 +69,8 @@ public class AStar extends AbstractAlgorithm {
                 }
                 notifyCounterListenersAndIncreaseCounter();
                 used[next.x][next.y] = true;
-                //previous[next.x][next.y] = current;
-                distance[next.x][next.y] = distance[current.x][current.y] + 1;
+                //cameFrom[next.x][next.y] = current;
+                g[next.x][next.y] = g[current.x][current.y] + 1;
                 if (isFinish(next)) {
                     pathFound = true;
                 } else {
@@ -130,7 +85,53 @@ public class AStar extends AbstractAlgorithm {
             if (!backTraceFinished) {
                 if (!isStart(pathTracerSquare)) {
                     System.out.println("" + pathTracerSquare.x + ' ' + pathTracerSquare.y);
-                    pathTracerSquare = previous[pathTracerSquare.x][pathTracerSquare.y];
+                    pathTracerSquare = cameFrom[pathTracerSquare.x][pathTracerSquare.y];
+                    pathTracerSquare.setBackground(Table.PATH_COLOR);
+                } else {
+                    pathTracerSquare.setBackground(Table.START_COLOR);
+                    backTraceFinished = true;
+                }
+                Thread.sleep(delay);
+            } else {
+                throw new AlgorithmFinishedException("AStar ended");
+            }
+        }
+    }
+ */
+    @Override
+    protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException {
+        if (!pathFound) {
+            if (!priorityQueue.isEmpty()) {
+                current = priorityQueue.poll().square;
+                if (isFinish(current)) {
+                    pathFound = true;
+                } else {
+                    notifyCounterListenersAndIncreaseCounter();
+                    if (!isStart(current) && !isFinish(current))
+                        current.setBackground(Table.REMAINING_COLOR);
+                    used[current.x][current.y] = true;
+                    Thread.sleep(delay * 2L);
+                    neighbours = getNeighboursOf(current);
+                    for (Square neighbour : neighbours) {
+                        if (!isFinish(neighbour) && !used[neighbour.x][neighbour.y])
+                            neighbour.setBackground(Table.MARKER_COLOR);
+                        Thread.sleep(delay);
+                        int tentativeG = g[current.x][current.y] + 1;
+                        if (tentativeG < g[neighbour.x][neighbour.y]) {
+                            g[neighbour.x][neighbour.y] = tentativeG;
+                            cameFrom[neighbour.x][neighbour.y] = current;
+                            f[neighbour.x][neighbour.y] = g[neighbour.x][neighbour.y] + euclideanHeuristic(neighbour);
+                            priorityQueue.offer(new Element(neighbour));
+                        }
+                    }
+                }
+            } else {
+                throw new PathNotFoundException("Path not found");
+            }
+        } else {
+            if (!backTraceFinished) {
+                if (!isStart(pathTracerSquare)) {
+                    pathTracerSquare = cameFrom[pathTracerSquare.x][pathTracerSquare.y];
                     pathTracerSquare.setBackground(Table.PATH_COLOR);
                 } else {
                     pathTracerSquare.setBackground(Table.START_COLOR);
@@ -157,17 +158,19 @@ public class AStar extends AbstractAlgorithm {
     };
 
     class Element implements Comparable<Element> {
-        public double f;
         public Square square;
 
         public Element(Square square) {
             this.square = square;
-            f = distance[square.x][square.y] + euclideanHeuristic(square);
         }
 
         @Override
         public int compareTo(Element o) {
-            return Double.compare(f, o.f);
+            return Double.compare(f[square.x][square.y], f[o.square.x][o.square.y]);
         }
+        //Transform it into Dijkstra's algorithm
+        /*public int compareTo(Element o) {
+            return Double.compare(g[square.x][square.y], g[o.square.x][o.square.y]);
+        }*/
     }
 }

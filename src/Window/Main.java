@@ -43,11 +43,11 @@ public class Main extends JFrame implements AlgorithmListener {
     private boolean clearPathButtonEnabled = false;
     private boolean diagonalDirectionEnabled = true;
     private AbstractAlgorithm algorithm;
-    private final int MAX_SPEED = 50;
-    private final int MIN_SPEED = 1;
+    private final int MAX_SPEED = 150;
+    private final int MIN_SPEED = 10;
     private final int MIN_TABLE_SIZE = 5;
     private final int MAX_TABLE_SIZE = 50;
-    private int speed = MAX_SPEED / 2;
+    private int speed = (MIN_SPEED + MAX_SPEED) / 2;
 
     Main() {
         MAIN_PANEL = new JPanel();
@@ -90,7 +90,6 @@ public class Main extends JFrame implements AlgorithmListener {
         constraints.gridx = 3;
         constraints.gridy = 0;
         constraints.gridheight = 2;
-        enableDiagonalDirectionCheckBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         top.add(enableDiagonalDirectionCheckBox, constraints);
     }
 

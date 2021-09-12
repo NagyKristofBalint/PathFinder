@@ -19,10 +19,10 @@ public class Moore extends AbstractAlgorithm {
             }
         }
         queue = new LinkedList<>();
-        queue.add(squares.get(table.getStartX()).get(table.getStartY()));
+        queue.add(getStart());
         distance[table.getStartX()][table.getStartY()] = 0;
 
-        pathTracerSquare = squares.get(table.getFinishX()).get(table.getFinishY());
+        pathTracerSquare = getFinish();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Moore extends AbstractAlgorithm {
                         Thread.sleep(delay * 2L);
                         queue.add(neighbour);
                         distance[neighbour.x][neighbour.y] = distance[current.x][current.y] + 1;
-                        previous[neighbour.x][neighbour.y] = current;
+                        cameFrom[neighbour.x][neighbour.y] = current;
                         neighbour.setBackground(Table.REMAINING_COLOR);
                         if (isStart(neighbour)) {
                             neighbour.setBackground(Table.START_COLOR);
@@ -62,7 +62,7 @@ public class Moore extends AbstractAlgorithm {
         } else {
             if (!backTraceFinished) {
                 if (!isStart(pathTracerSquare)) {
-                    pathTracerSquare = previous[pathTracerSquare.x][pathTracerSquare.y];
+                    pathTracerSquare = cameFrom[pathTracerSquare.x][pathTracerSquare.y];
                     pathTracerSquare.setBackground(Table.PATH_COLOR);
                 } else {
                     pathTracerSquare.setBackground(Table.START_COLOR);
