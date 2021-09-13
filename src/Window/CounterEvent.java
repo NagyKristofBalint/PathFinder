@@ -3,7 +3,7 @@ package Window;
 import java.util.EventObject;
 
 public class CounterEvent extends EventObject {
-    private int value;
+    private final int value;
 
     /**
      * Constructs a prototypical Event.

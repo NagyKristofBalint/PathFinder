@@ -19,8 +19,7 @@ public class Table extends JPanel {
     private int finishY;
 
     Table(int size) {
-        setFinishX(size - 1);
-        setFinishY(size - 1);
+        setFinish(size - 1, size - 1);
 
         Square.setTable(this);
 
@@ -48,40 +47,26 @@ public class Table extends JPanel {
         return startY;
     }
 
-    public void setStartY(int startY) {
-        this.startY = startY;
-    }
-
     public int getStartX() {
         return startX;
-    }
-
-    public void setStartX(int startX) {
-        this.startX = startX;
     }
 
     public int getFinishX() {
         return finishX;
     }
 
-    public void setFinishX(int finishX) {
-        this.finishX = finishX;
-    }
-
     public int getFinishY() {
         return finishY;
     }
 
-    public void setFinishY(int finishY) {
-        this.finishY = finishY;
+    public void setFinish(int x, int y) {
+        finishX = x;
+        finishY = y;
     }
 
-    public boolean isStart(Square current) {
-        return current.equals(getStart());
-    }
-
-    public boolean isFinish(Square current) {
-        return current.equals(getFinish());
+    public void setStart(int x, int y) {
+        startX = x;
+        startY = y;
     }
 
     public Square getStart() {

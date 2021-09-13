@@ -58,7 +58,7 @@ public class Main extends JFrame implements AlgorithmListener {
 
     private void createTopSide() {
         stepCountLabel = new JLabel("0");
-        String[] algorithmStrings = {"Moore/Dijkstra", "A*"};
+        String[] algorithmStrings = {"Dijkstra", "A*"};
         algorithmChooser = new JComboBox(algorithmStrings);
         sizeChooser = new JSpinner(new SpinnerNumberModel(tableSize, MIN_TABLE_SIZE, MAX_TABLE_SIZE, 1));
         GridBagConstraints constraints = new GridBagConstraints();
@@ -207,8 +207,8 @@ public class Main extends JFrame implements AlgorithmListener {
                 String choice = (String) algorithmChooser.getSelectedItem();
 
                 diagonalDirectionEnabled = enableDiagonalDirectionCheckBox.isSelected();
-                if (choice.equals("Moore/Dijkstra")) {
-                    algorithm = new Moore(table, diagonalDirectionEnabled);
+                if (choice.equals("Dijkstra")) {
+                    algorithm = new Dijkstra(table, diagonalDirectionEnabled);
                 } else {
                     algorithm = new AStar(table, diagonalDirectionEnabled);
                 }

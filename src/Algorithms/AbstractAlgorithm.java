@@ -4,6 +4,7 @@ import Window.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 abstract public class AbstractAlgorithm implements Runnable {
@@ -14,7 +15,7 @@ abstract public class AbstractAlgorithm implements Runnable {
     protected volatile boolean isSuspended = false;
     protected volatile boolean pathFound = false;
     protected volatile boolean backTraceFinished = false;
-    protected Square[][] cameFrom;
+    protected HashMap<Square, Square> cameFrom;
     protected volatile static int delay;
     protected Square pathTracerSquare;
     protected LinkedList<AlgorithmListener> algorithmListeners;
@@ -23,7 +24,7 @@ abstract public class AbstractAlgorithm implements Runnable {
     public AbstractAlgorithm(Table table, boolean crossDirectionEnabled) {
         this.table = table;
         squares = table.squares;
-        cameFrom = new Square[squares.size()][squares.size()];
+        cameFrom = new HashMap<>(squares.size() * squares.size());
         algorithmListeners = new LinkedList<>();
         this.crossDirectionEnabled = crossDirectionEnabled;
     }
@@ -45,9 +46,8 @@ abstract public class AbstractAlgorithm implements Runnable {
                 }
             }
 
-            if (Thread.interrupted()) {
+            if (Thread.interrupted())
                 break;
-            }
 
             try {
                 //////////////////////////////
@@ -87,12 +87,6 @@ abstract public class AbstractAlgorithm implements Runnable {
     protected synchronized void notifyCounterListenersAndIncreaseCounter() {
         for (AlgorithmListener listener : algorithmListeners) {
             listener.valueChanged(new CounterEvent(this, ++steps));
-        }
-    }
-
-    protected synchronized void notifyCounterListenersAndIncreaseCounter(int stepSize) {
-        for (AlgorithmListener listener : algorithmListeners) {
-            listener.valueChanged(new CounterEvent(this, steps + stepSize));
         }
     }
 
@@ -173,22 +167,6 @@ abstract public class AbstractAlgorithm implements Runnable {
         }
 
         return neighbours;
-    }
-
-    protected Square getStart() {
-        return squares.get(table.getStartX()).get(table.getStartY());
-    }
-
-    protected Square getFinish() {
-        return squares.get(table.getFinishX()).get(table.getFinishY());
-    }
-
-    protected boolean isStart(Square current) {
-        return current.equals(getStart());
-    }
-
-    protected boolean isFinish(Square current) {
-        return current.equals(getFinish());
     }
 
     public static void setDelay(int delay) {

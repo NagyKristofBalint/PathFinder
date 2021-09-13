@@ -17,7 +17,6 @@ public class Square extends JPanel {
     private static Table table;
     private static int previousX;
     private static int previousY;
-    private static Color previousColor;
 
     @Override
     public boolean equals(Object obj) {
@@ -26,6 +25,11 @@ public class Square extends JPanel {
         }
         Square s = (Square) obj;
         return (s.x == x && s.y == y);
+    }
+
+    @Override
+    public int hashCode() {
+        return table.squares.size() * x + y;
     }
 
     public Square(int x, int y) {
@@ -66,8 +70,7 @@ public class Square extends JPanel {
                     if (startPressed) {
                         if (!isFinish() && !isWall) {
                             setBackground(Table.START_COLOR);
-                            table.setStartX(x);
-                            table.setStartY(y);
+                            table.setStart(x, y);
                             table.squares.get(previousX).get(previousY).setBackground(defaultBackgroundColor);
                         } else {
                             mousePressed = false;
@@ -78,8 +81,7 @@ public class Square extends JPanel {
                         if (finishPressed) {
                             if (!isStart() && !isWall) {
                                 setBackground(Table.FINISH_COLOR);
-                                table.setFinishX(x);
-                                table.setFinishY(y);
+                                table.setFinish(x, y);
                                 table.squares.get(previousX).get(previousY).setBackground(defaultBackgroundColor);
                             } else {
                                 mousePressed = false;
@@ -98,7 +100,7 @@ public class Square extends JPanel {
             @Override
             public void mouseExited(MouseEvent e) {
                 super.mouseExited(e);
-                if (listenersEnabled){
+                if (listenersEnabled) {
                     previousX = x;
                     previousY = y;
                 }
@@ -118,11 +120,11 @@ public class Square extends JPanel {
         }
     }
 
-    private boolean isStart() {
+    public boolean isStart() {
         return (x == table.getStartX() && y == table.getStartY());
     }
 
-    private boolean isFinish() {
+    public boolean isFinish() {
         return (x == table.getFinishX() && y == table.getFinishY());
     }
 
