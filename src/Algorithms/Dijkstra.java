@@ -67,8 +67,9 @@ public class Dijkstra extends AbstractAlgorithm {
                 }
                 Thread.sleep(delay);
             } else {
-                throw new AlgorithmFinishedException("AStar ended");
+                throw new AlgorithmFinishedException("Dijkstra ended");
             }
+            //System.out.println(2^4);
         }
     }
 

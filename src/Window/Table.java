@@ -42,7 +42,6 @@ public class Table extends JPanel {
         Square.setListenersEnabled(x);
     }
 
-
     public int getStartY() {
         return startY;
     }

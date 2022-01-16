@@ -16,7 +16,7 @@ public class CounterEvent extends EventObject {
         this.value = value;
     }
 
-    public int getValue(){
+    public int getValue() {
         return value;
     }
 }

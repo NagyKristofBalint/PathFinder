@@ -1,5 +1,6 @@
 package Algorithms;
 
+import Util.MyAudioPlayer;
 import Window.*;
 
 import javax.swing.*;
@@ -19,6 +20,7 @@ abstract public class AbstractAlgorithm implements Runnable {
     protected volatile static int delay;
     protected Square pathTracerSquare;
     protected LinkedList<AlgorithmListener> algorithmListeners;
+    private MyAudioPlayer myAudioPlayer;
     private final boolean crossDirectionEnabled;
 
     public AbstractAlgorithm(Table table, boolean crossDirectionEnabled) {
@@ -27,6 +29,7 @@ abstract public class AbstractAlgorithm implements Runnable {
         cameFrom = new HashMap<>(squares.size() * squares.size());
         algorithmListeners = new LinkedList<>();
         this.crossDirectionEnabled = crossDirectionEnabled;
+        myAudioPlayer = new MyAudioPlayer();
     }
 
     abstract protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException;
@@ -52,14 +55,20 @@ abstract public class AbstractAlgorithm implements Runnable {
             try {
                 //////////////////////////////
                 nextIteration();
+                if (!myAudioPlayer.isRunning() && !isSuspended) {
+                    myAudioPlayer.resetAudio();
+                    myAudioPlayer.playTraceSound();
+                }
                 //////////////////////////////
             } catch (InterruptedException | AlgorithmFinishedException e) {
                 System.out.println(e.getMessage());
                 notifyAlgorithmStateListeners();
+                myAudioPlayer.stopTraceSound();
                 break;
             } catch (PathNotFoundException e) {
-                JOptionPane.showMessageDialog(table, e.getMessage());
                 notifyAlgorithmStateListeners();
+                myAudioPlayer.stopTraceSound();
+                JOptionPane.showMessageDialog(table, e.getMessage());
                 break;
             }
         }
@@ -67,21 +76,25 @@ abstract public class AbstractAlgorithm implements Runnable {
 
     public void stop() {
         thread.interrupt();
+        myAudioPlayer.stopTraceSound();
     }
 
     public void start() {
         isSuspended = false;
         thread = new Thread(this);
         thread.start();
+        myAudioPlayer.playTraceSound();
     }
 
     public void suspend() {
         isSuspended = true;
+        myAudioPlayer.stopTraceSound();
     }
 
     public synchronized void resume() {
         isSuspended = false;
         notifyAll();
+        myAudioPlayer.playTraceSound();
     }
 
     protected synchronized void notifyCounterListenersAndIncreaseCounter() {

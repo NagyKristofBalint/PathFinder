@@ -325,5 +325,6 @@ public class Main extends JFrame implements AlgorithmListener {
         MainWindow.setBounds(WINDOW_OFFSET_X, WINDOW_OFFSET_Y, WINDOW_WIDTH, WINDOW_HEIGHT);
         MainWindow.setTitle(TITLE);
         MainWindow.setVisible(true);
+
     }
 }
