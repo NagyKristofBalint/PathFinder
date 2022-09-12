@@ -69,7 +69,6 @@ public class Dijkstra extends AbstractAlgorithm {
             } else {
                 throw new AlgorithmFinishedException("Dijkstra ended");
             }
-            //System.out.println(2^4);
         }
     }
 

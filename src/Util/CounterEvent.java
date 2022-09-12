@@ -1,4 +1,4 @@
-package Window;
+package Util;
 
 import java.util.EventObject;
 

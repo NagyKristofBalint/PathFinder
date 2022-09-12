@@ -1,5 +1,7 @@
 package Algorithms;
 
+import Util.AlgorithmListener;
+import Util.CounterEvent;
 import Util.MyAudioPlayer;
 import Window.*;
 
@@ -29,7 +31,7 @@ abstract public class AbstractAlgorithm implements Runnable {
         cameFrom = new HashMap<>(squares.size() * squares.size());
         algorithmListeners = new LinkedList<>();
         this.crossDirectionEnabled = crossDirectionEnabled;
-        myAudioPlayer = new MyAudioPlayer();
+        myAudioPlayer = new MyAudioPlayer(table);
     }
 
     abstract protected void nextIteration() throws AlgorithmFinishedException, PathNotFoundException, InterruptedException;
@@ -37,29 +39,22 @@ abstract public class AbstractAlgorithm implements Runnable {
     @Override
     public void run() {
         while (true) {
-            while (isSuspended) {
-                synchronized (this) {
-                    try {
+            try {
+                while (isSuspended) {
+                    synchronized (this) {
                         wait();
-                    } catch (InterruptedException e) {
-                        //The creation of an IntrerruptedException clears the intrerrupted flag, but I need it
-                        thread.interrupt();
-                        break;
                     }
                 }
+            } catch (InterruptedException e) {
+                break;
             }
 
-            if (Thread.interrupted())
-                break;
-
             try {
-                //////////////////////////////
                 nextIteration();
                 if (!myAudioPlayer.isRunning() && !isSuspended) {
                     myAudioPlayer.resetAudio();
                     myAudioPlayer.playTraceSound();
                 }
-                //////////////////////////////
             } catch (InterruptedException | AlgorithmFinishedException e) {
                 System.out.println(e.getMessage());
                 notifyAlgorithmStateListeners();
@@ -105,7 +100,7 @@ abstract public class AbstractAlgorithm implements Runnable {
 
     private synchronized void notifyAlgorithmStateListeners() {
         for (AlgorithmListener listener : algorithmListeners) {
-            listener.AlgorithmFinished();
+            listener.algorithmFinished();
         }
     }
 

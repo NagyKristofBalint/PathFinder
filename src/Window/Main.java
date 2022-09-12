@@ -1,6 +1,8 @@
 package Window;
 
 import Algorithms.*;
+import Util.AlgorithmListener;
+import Util.CounterEvent;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -177,6 +179,7 @@ public class Main extends JFrame implements AlgorithmListener {
             public void stateChanged(ChangeEvent e) {
                 if (sizeChooserEnabled) {
                     tableSize = (int) sizeChooser.getValue();
+                    //building window again with new information
                     MAIN_PANEL.removeAll();
                     createWindow();
                     addListeners();
@@ -235,7 +238,7 @@ public class Main extends JFrame implements AlgorithmListener {
         stopButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AlgorithmFinished();
+                algorithmFinished();
                 algorithm.stop();
             }
         });
@@ -299,7 +302,7 @@ public class Main extends JFrame implements AlgorithmListener {
     }
 
     @Override
-    public void AlgorithmFinished() {
+    public void algorithmFinished() {
         algorithmChooserEnabled = true;
         sizeChooserEnabled = true;
         startButtonEnabled = true;

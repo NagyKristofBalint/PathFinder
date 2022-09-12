@@ -1,6 +1,6 @@
-package Window;
+package Util;
 
 public interface AlgorithmListener {
-    void AlgorithmFinished();
+    void algorithmFinished();
     void valueChanged(CounterEvent e);
 }

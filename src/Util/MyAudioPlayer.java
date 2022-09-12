@@ -1,13 +1,17 @@
 package Util;
 
+import Window.Table;
+
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 
 public class MyAudioPlayer {
     private Clip traceClip = null;
+    private Table table;
 
-    public MyAudioPlayer() {
+    public MyAudioPlayer(Table table) {
+        this.table = table;
         resetAudio();
     }
 
